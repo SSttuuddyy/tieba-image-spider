@@ -7,6 +7,7 @@ class Spieder():
     def __init__(self): 
         self.id = ''
         self.num = 0
+        self.gui = ''
     def get_page(self, num_start, num_end):#生成每页地址
         self.url = 'https://tieba.baidu.com/p/'+self.id+'?pn='
         page_list=[]
@@ -22,18 +23,22 @@ class Spieder():
         self.img_list=re.findall(pattern, self.html)
         self.name_list=re.findall(pattern2, self.html)
     def parse_title(self, film):#获取帖子标题
-        pattern3 = re.compile(r"'threadTitle': '(.*?)'}")
+        pattern3 = re.compile(r"'threadTitle': '(.*?)'}]")
         self.title_list = re.findall(pattern3, self.html)
-        self.path = film + '//' + self.title_list[0] + '//'
+        sets = ['/', '\\', ':', '*', '?', '"', '<', '>', '|']
+        for char in self.title_list[0]:
+            if char in sets:
+                self.title_list[0] = self.title_list[0].replace(char, '')
+        self.path = film + '/' + self.title_list[0] + '/'
         return self.path
     def mkdir(self):#找到存储位置
         folder = os.path.exists(self.path)
         if not folder:
             os.makedirs(self.path)
-            print(self.title_list[0]+'创建中')
-            print(self.title_list[0]+'已创建')
+            self.gui.tinsert(1, '\n'+self.title_list[0]+'创建中')
+            self.gui.tinsert(1, '\n'+self.title_list[0]+'创建成功')
         else:
-            print(self.title_list[0]+'已存在')
+            self.gui.tinsert(1, '\n'+self.title_list[0]+'已存在')
     def download(self):#下载图片
         for i in range(len(self.img_list)):
             r=requests.get(self.img_list[i])
@@ -41,5 +46,5 @@ class Spieder():
                 f.write(r.content)
                 f.close()
                 self.num = self.num + 1
-                print(' 第 %s 张图片下载完成' % self.num)
+                self.gui.tinsert(2, '\n第 '+ str(self.num) +' 张图片下载完成')
             sleep(1)
