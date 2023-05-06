@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
-import os
+import os, re
 from tkinter.filedialog import askdirectory
 from tkinter import StringVar
 from tkinter import Text
@@ -9,12 +9,11 @@ from tkinter import INSERT, END, ttk
 class Gui():
     def __init__(self):
         self.sp = None
-        self.brow_id = 0
     def gene(self):
         if True:
             self.root = tk.Tk()
             width = 380
-            height = 380
+            height = 260
             sw = self.root.winfo_screenwidth()  # width
             sh = self.root.winfo_screenheight() - 80  # higth
             x = (sw-width) / 2
@@ -23,10 +22,10 @@ class Gui():
             # select a browser
             tk.Label(self.root, text='浏览器：', font=('楷体', 15)).grid(row=0, column=0)
             self.brow = ttk.Combobox(self.root)
-            self.entryPage1 = ttk.Combobox(self.root)
-            self.entryPage1.grid(row=0, column=1, ipadx=25)
-            self.entryPage1['value'] = ('Edge', 'Google')
-            self.entryPage1.current(0)
+            self.brow = ttk.Combobox(self.root)
+            self.brow.grid(row=0, column=1, ipadx=25)
+            self.brow['value'] = ('Edge', 'Google')
+            self.brow.current(0)
             # id number of post
             tk.Label(self.root, text='帖子号：', font=('楷体', 15)).grid(row=1, column=0)
             self.entry = tk.Entry(self.root)
@@ -53,10 +52,10 @@ class Gui():
             self.entryFilm = tk.Entry(self.root, textvariable=self.select_path)
             self.entryFilm.grid(row=4, column=1, ipadx=25)
             # a square frame to show the information
-            self.text1 = tk.Text(self.root, width=28, height=5)
+            self.text1 = tk.Text(self.root, width=28, height=2)
             self.text1.grid(row=7, column=1)
             self.text1.insert(END, ' ')
-            self.text2 = tk.Text(self.root, width=28, height=10)
+            self.text2 = tk.Text(self.root, width=28, height=1)
             self.text2.grid(row=8, column=1)
             self.text2.insert(END, ' ')
         # some button
@@ -68,35 +67,44 @@ class Gui():
         button3.grid(row=4, column=2)
         self.root.mainloop()
     def act(self): # get the post id, start page, sum of page and store path
-        if self.brow.get() == 'Edge':
-            self.brow_id = 0
+        if str(self.brow.get()) == 'Edge':
+            self.sp.select_brow(0)
         else:
-            self.brow_id = 1
-        self.id = self.entry.get().strip()
+            self.sp.select_brow(1)
+        self.id = self.entry.get()
         self.num_start = int(self.entryPage1.get())
         self.num_sum = int(self.entryPage2.get())
-        self.num_end = self.num_start + self.num_sum - 1
         self.film = self.select_path.get()
     def action(self): # get info, create folder and download
         self.text1.delete('1.0', 'end')
         self.text2.delete('1.0', 'end')
         self.root.update()
         self.act()
-        self.sp.brow_id = self.brow_id
-        self.sp.id = self.id
-        page_list = self.sp.get_page(self.num_start, self.num_end)
+        url = 'https://tieba.baidu.com/p/'+self.id+'?pn='
+        self.sp.get_html(url + '1')
+        page_list = []
+        for i in range(min(self.num_start, self.sp.sum), min(self.num_start + self.num_sum, self.sp.sum + 1)):
+            page_list.append(url+'%d' %i+'/')
+        for i in range(self.num_sum - min(self.num_start + self.num_sum, self.sp.sum + 1) + min(self.num_start, self.sp.sum)):
+            page_list.append('0')
         count = self.num_start
-        self.sp.get_html(page_list[0])
-        self.path = self.sp.parse_title(self.film) # return a list
+        self.path = self.sp.parse_title(self.film)
         self.sp.mkdir()
         for url in page_list:
-            self.sp.get_html(url)
-            self.sp.parse_html()
-            self.tinsert(1, '\n第 '+ str(count) +' 页图片下载中')
-            self.sp.download()
+            if url != '0':
+                if self.num_start > self.sp.sum:
+                    self.tinsert(1, '\n第 '+ str(count) +' 页不存在\n正在下载第 '+str(self.sp.sum)+' 页图片')
+                else:
+                    self.tinsert(1, '\n第 '+ str(count) +' 页图片下载中')
+                self.sp.get_html(url)
+                self.sp.parse_html()
+                self.sp.download()
+            else:
+                self.tinsert(1, '\n第 '+ str(count) +' 页不存在')
             count = count + 1
+            self.sp.num = 0
+        self.tinsert(1, '下载完成')
         messagebox.showinfo(message='下载完成')
-        self.sp.num = 0
     def open_folder(self): # open the folder created
         os.startfile(self.path)
     def select_folder(self): # select a path to create
