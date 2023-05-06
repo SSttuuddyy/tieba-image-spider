@@ -6,4 +6,4 @@ if __name__=='__main__':
     sp = Spieder()
     gui.sp = sp
     sp.gui = gui
-    gui.gene()
+    gui.gene() # create a GUI window

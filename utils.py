@@ -8,30 +8,41 @@ class Spieder():
         self.id = ''
         self.num = 0
         self.gui = ''
-    def get_page(self, num_start, num_end):#生成每页地址
+        self.brow_id = 0
+        if self.brow_id == 0:
+            self.headers = {
+                'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36 Edg/110.0.1587.69'
+                }
+        else:
+            self.headers = {
+                'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36'
+                }
+    def get_page(self, num_start, num_end): # get the url of required pages of post
         self.url = 'https://tieba.baidu.com/p/'+self.id+'?pn='
-        page_list=[]
+        page_list = []
         for i in range(num_start, num_end+1):
             page_list.append(self.url+'%d' %i+'/')
         return page_list
-    def get_html(self, url):#获取当页网址源代码
-        response=requests.get(url)
-        self.html=response.text
-    def parse_html(self):#解析获取图片地址和名称
-        pattern = re.compile(r'img class="BDE_Image".*?"(.*?)"')
+    def get_html(self, url): # get the html of inputed page
+        response=requests.get(url,headers=self.headers)
+        self.html = response.text
+    def parse_html(self): # get the image url and the name of the image from the html
+        pattern = re.compile(r'img class="BDE_Image".*?src="(.*?)"')
         pattern2 = re.compile(r'img class="BDE_Image".*?sign=.*?/(.*?).jpg')
-        self.img_list=re.findall(pattern, self.html)
-        self.name_list=re.findall(pattern2, self.html)
-    def parse_title(self, film):#获取帖子标题
+        self.img_list = re.findall(pattern, self.html)
+        self.name_list = re.findall(pattern2, self.html)
+    def parse_title(self, film): # get the title of the post
         pattern3 = re.compile(r"'threadTitle': '(.*?)'}]")
         self.title_list = re.findall(pattern3, self.html)
+        if self.gui.num_start > 1:
+            self.title_list[0] = self.title_list[0][3:]
         sets = ['/', '\\', ':', '*', '?', '"', '<', '>', '|']
         for char in self.title_list[0]:
             if char in sets:
                 self.title_list[0] = self.title_list[0].replace(char, '')
         self.path = film + '/' + self.title_list[0] + '/'
         return self.path
-    def mkdir(self):#找到存储位置
+    def mkdir(self): # create a folder with the name of the post to store the images
         folder = os.path.exists(self.path)
         if not folder:
             os.makedirs(self.path)
@@ -39,9 +50,9 @@ class Spieder():
             self.gui.tinsert(1, '\n'+self.title_list[0]+'创建成功')
         else:
             self.gui.tinsert(1, '\n'+self.title_list[0]+'已存在')
-    def download(self):#下载图片
+    def download(self): # download the image
         for i in range(len(self.img_list)):
-            r=requests.get(self.img_list[i])
+            r=requests.get(self.img_list[i], headers = self.headers)
             with open(self.path+self.name_list[i]+'.jpg', 'wb') as f:
                 f.write(r.content)
                 f.close()
