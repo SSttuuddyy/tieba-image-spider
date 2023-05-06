@@ -27,7 +27,7 @@ class Gui():
             self.brow['value'] = ('Edge', 'Google')
             self.brow.current(0)
             # id number of post
-            tk.Label(self.root, text='帖子号：', font=('楷体', 15)).grid(row=1, column=0)
+            tk.Label(self.root, text='帖子链接：', font=('楷体', 15)).grid(row=1, column=0)
             self.entry = tk.Entry(self.root)
             self.entry.grid(row=1, column=1, ipadx=25)
             self.entry.bind("<Button-3>", self.paste)
@@ -72,6 +72,10 @@ class Gui():
         else:
             self.sp.select_brow(1)
         self.id = self.entry.get()
+        pattern = re.compile(r'/p/(.{10})')
+        if '/p/' in self.id:
+            self.id = re.findall(pattern, self.id)
+            self.id = self.id[0]
         self.num_start = int(self.entryPage1.get())
         self.num_sum = int(self.entryPage2.get())
         self.film = self.select_path.get()
