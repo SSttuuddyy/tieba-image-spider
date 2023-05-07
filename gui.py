@@ -12,7 +12,7 @@ class Gui():
     def gene(self):
         if True:
             self.root = tk.Tk()
-            width = 380
+            width = 385
             height = 260
             sw = self.root.winfo_screenwidth()  # width
             sh = self.root.winfo_screenheight() - 80  # higth
@@ -21,15 +21,16 @@ class Gui():
             self.root.geometry("%dx%d+%d+%d" % (width, height, x, y))
             # select a browser
             tk.Label(self.root, text='浏览器：', font=('楷体', 15)).grid(row=0, column=0)
+            tk.Label(self.root, text='(可选)', font=('楷体', 10)).grid(row=0, column=2)
             self.brow = ttk.Combobox(self.root)
             self.brow = ttk.Combobox(self.root)
             self.brow.grid(row=0, column=1, ipadx=25)
             self.brow['value'] = ('Edge', 'Google')
-            self.brow.current(0)
+            self.brow.current(1)
             # id number of post
-            tk.Label(self.root, text='帖子链接：', font=('楷体', 15)).grid(row=1, column=0)
+            tk.Label(self.root, text='帖链接：', font=('楷体', 15)).grid(row=1, column=0)
             self.entry = tk.Entry(self.root)
-            self.entry.grid(row=1, column=1, ipadx=25)
+            self.entry.grid(row=1, column=1, ipadx=35)
             self.entry.bind("<Button-3>", self.paste)
             # start page
             tk.Label(self.root, text='起始页：', font=('楷体', 15)).grid(row=2, column=0)
@@ -38,24 +39,24 @@ class Gui():
             self.entryPage1['value'] = tuple([i for i in range(1,11)])
             self.entryPage1.current(0)
             # sum page
-            tk.Label(self.root, text='合计页：', font=('楷体', 15)).grid(row=3, column=0)
+            tk.Label(self.root, text='总共页：', font=('楷体', 15)).grid(row=3, column=0)
             tk.Label(self.root, text='可以超过实', font=('楷体', 10)).grid(row=2, column=2)
             tk.Label(self.root, text='际最大页数', font=('楷体', 10)).grid(row=3, column=2)
             self.entryPage2 = ttk.Combobox(self.root)
             self.entryPage2.grid(row=3, column=1, ipadx=25)
             self.entryPage2['value'] = tuple([i for i in range(1,11)])
-            self.entryPage2.current(0)
+            self.entryPage2.current(9)
             # a button to select path to create a folder
             self.select_path = StringVar()
             self.select_path.set('D:/')
             tk.Label(self.root, text='文件夹：', font=('楷体', 15)).grid(row=4, column=0)
             self.entryFilm = tk.Entry(self.root, textvariable=self.select_path)
-            self.entryFilm.grid(row=4, column=1, ipadx=25)
+            self.entryFilm.grid(row=4, column=1, ipadx=35)
             # a square frame to show the information
-            self.text1 = tk.Text(self.root, width=28, height=2)
+            self.text1 = tk.Text(self.root, width=30, height=2)
             self.text1.grid(row=7, column=1)
             self.text1.insert(END, ' ')
-            self.text2 = tk.Text(self.root, width=28, height=1)
+            self.text2 = tk.Text(self.root, width=30, height=1)
             self.text2.grid(row=8, column=1)
             self.text2.insert(END, ' ')
         # some button
@@ -107,7 +108,7 @@ class Gui():
                 self.tinsert(1, '\n第 '+ str(count) +' 页不存在')
             count = count + 1
             self.sp.num = 0
-        self.tinsert(1, '下载完成')
+        self.tinsert(1, '\n下载完成')
         messagebox.showinfo(message='下载完成')
     def open_folder(self): # open the folder created
         os.startfile(self.path)

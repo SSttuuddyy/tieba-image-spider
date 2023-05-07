@@ -18,7 +18,7 @@ class Spieder():
                 'User-Agent':'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/113.0.0.0 Safari/537.36'
                 }
     def get_html(self, url): # get the html of inputed page
-        response=requests.get(url,headers=self.headers)
+        response=requests.get(url, headers=self.headers, verify=False)
         self.html = response.text
         pattern = re.compile(r'<span class="red">(.*?)</span>')
         self.sum = re.findall(pattern, self.html)
@@ -50,7 +50,7 @@ class Spieder():
             self.gui.tinsert(1, '\n'+self.title_list+' 已存在')
     def download(self): # download the image
         for i in range(len(self.img_list)):
-            r=requests.get(self.img_list[i])
+            r=requests.get(self.img_list[i], headers=self.headers, verify=False)
             with open(self.path+self.name_list[i]+'.jpg', 'wb') as f:
                 f.write(r.content)
                 f.close()
